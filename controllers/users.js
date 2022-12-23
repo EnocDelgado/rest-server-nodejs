@@ -1,43 +1,76 @@
 const { response } = require('express')
+const User = require('../models/user') // User is capitalized to create an instance
+const bcrypt = require('bcrypt')
 
-const getUser =  ( req, res = response ) => {
+
+const getUser =  async( req, res = response ) => {
     
-    const { q, name = "no name", api_key = "no api key", page = 1, limit } = req.query
+    // pagination is to asign specifics attributes to show in our response
+    const { limit = 5, from = 0 } = req.query
+    const query = { state: true }
+    
+    // We use Promise casue is more efficient and fast
+    const [ total, users ] = await Promise.all([
+        User.count( query ),
+        User.find( query )
+           .skip( Number( from ) )
+           .limit( Number( limit ) )
+    ])
 
     res.json({
-        msg: "get API - Controller"
+        total,
+        users
     })
 }
 
-const putUser =  ( req, res = response ) => {
+const putUser =  async( req, res = response ) => {
 
-    const id = req.params
+    const { id } = req.params
+    const { _id, password, google, email, ...rest } = req.body
+
+    // TODO: validate against the database
+    if ( password ) {
+        // Encrypt the  password
+        const salt = bcrypt.genSaltSync()
+        rest.password = bcrypt.hashSync( password, salt )
+    }
+    const user = await User.findOneAndUpdate( id, rest )
 
     res.json({
         msg: "put API - Controller",
-        id
+        user
     })
 }
 
 
-const postUser =  ( req, res = response ) => {
+const postUser =  async( req, res = response ) => {
 
     // This is to read the body of the request
-    const body = req.body
+    const { name, email, password, role } = req.body
+    const user = new User({ name, email, password, role })
+
+    // Encrypt the password
+    const salt = bcrypt.genSaltSync(10) // Salt is numbers of shifts for encryption
+    user.password = bcrypt.hashSync( password, salt )
+
+    // user save is to save in MongoDB
+    await user.save()
 
     res.json({
-        msg: "post API - Controller",
-        body
+        user
     })
 }
 
-const deleteUser =  ( req, res = response ) => {
-    res.json({
-        msg: "delete API - Controller"
-    })
+const deleteUser =  async( req, res = response ) => {
+    const { id } = req.params
+
+    // we really erased it
+    const user = await User.findOneAndUpdate( id, { state: false } )
+
+    res.json( user )
 }
 
-const patch =( req, res = response ) => {
+const patchUser =( req, res = response ) => {
     res.json({
         msg: "patch API - Controller"
     })
@@ -48,5 +81,5 @@ module.exports = {
     postUser,
     putUser,
     deleteUser,
-    patch
+    patchUser
 }

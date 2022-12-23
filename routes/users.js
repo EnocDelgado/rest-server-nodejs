@@ -1,17 +1,38 @@
 const { Router } = require('express')
-const { getUser, postUser, putUser, deleteUser, patch } = require('../controllers/users')
+const { check } = require('express-validator')
+const { getUser, postUser, putUser, deleteUser, patchUser } = require('../controllers/users')
+const { isValidRole, isValidEmail, isValidID } = require('../helpers/db-validators')
+const { validateFields } = require('../middlewares/validate-fields')
 
 const router = Router()
 
 router.get('/', getUser )
 
 
-router.put('/:id', putUser )
+router.put('/:id', [
+    check("id", "Invalid id").isMongoId(),
+    check("id").custom( isValidID ),
+    check("role").custom( isValidRole ),
+    validateFields
+], putUser )
 
-router.post('/', postUser )
+router.post('/', [
+    check("name", "Name is required").not().isEmpty(),
+    check("email", "Email is invalid").isEmail(),
+    check("email").custom( isValidEmail ),
+    check("password", "Password must be at least 6 characters long").isLength({ min: 6 }),
+    // check("role", "Invalid role").isIn(["ADMIN_ROLE", "USER_ROLE"]),
+    check("role").custom( isValidRole ),
+    validateFields
+],
+postUser )
 
-router.delete('/', deleteUser )
-
-router.patch('/', patch )
+router.delete('/:id', [
+    check("id", "Invalid id").isMongoId(),
+    check("id").custom( isValidID ),
+    validateFields
+], deleteUser )
+    
+router.patch('/', patchUser )
 
 module.exports = router

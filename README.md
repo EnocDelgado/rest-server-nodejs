@@ -1,18 +1,10 @@
 # WebServer + RESTServer
 
-This is the REST server project of Fernando Herrera's Node.js course.
+This is the RESTServer project of Fernando Herrera's Node.js course. It uses MongoDB to create a CRUD.
 
 ## Installation
 
 To install all dependencies just run the following command
 ```
 npm install
-```
-
-### ENV file
-
-Create a .env file that contains the PORT
-Example:
-```
-PORT=3000
 ```
