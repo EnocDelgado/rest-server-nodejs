@@ -7,16 +7,15 @@ class Server {
     constructor(){
         this.app = express();
         this.port = process.env.PORT || 3000;
+
         this.userPath = '/api/users'
+        this.authPath = '/api/auth'
 
         // Database connection
         this.connectingDB()
 
         // Middleware
         this.middlewares()
-
-        // Reading and parsing from the body
-        this.app.use( express.json() )
 
         // Route middleware
         this.routes()
@@ -31,11 +30,15 @@ class Server {
         // CORS
         this.app.use( cors() )
 
+        // Reading and parsing from the body
+        this.app.use( express.json() )
+
         // Public directory
         this.app.use( express.static('public') )
     }
 
     routes() {
+        this.app.use( this.authPath, require('../routes/auth') )
         this.app.use( this.userPath, require('../routes/users') )
     };
 

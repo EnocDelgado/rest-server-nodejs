@@ -11,7 +11,7 @@ const getUser =  async( req, res = response ) => {
     
     // We use Promise casue is more efficient and fast
     const [ total, users ] = await Promise.all([
-        User.count( query ),
+        User.countDocuments( query ),
         User.find( query )
            .skip( Number( from ) )
            .limit( Number( limit ) )
@@ -22,6 +22,26 @@ const getUser =  async( req, res = response ) => {
         users
     })
 }
+
+
+const postUser =  async( req, res = response ) => {
+
+    // This is to read the body of the request
+    const { name, email, password, role } = req.body
+    const user = new User({ name, email, password, role })
+
+    // Encrypt the password
+    const salt = bcrypt.genSaltSync() // Salt is numbers of shifts for encryption
+    user.password = bcrypt.hashSync( password, salt )
+
+    // user save is to save in MongoDB
+    await user.save()
+
+    res.json({
+        user
+    })
+}
+
 
 const putUser =  async( req, res = response ) => {
 
@@ -36,32 +56,19 @@ const putUser =  async( req, res = response ) => {
     }
     const user = await User.findOneAndUpdate( id, rest )
 
-    res.json({
-        msg: "put API - Controller",
-        user
-    })
+    res.json( user )
 }
 
 
-const postUser =  async( req, res = response ) => {
-
-    // This is to read the body of the request
-    const { name, email, password, role } = req.body
-    const user = new User({ name, email, password, role })
-
-    // Encrypt the password
-    const salt = bcrypt.genSaltSync(10) // Salt is numbers of shifts for encryption
-    user.password = bcrypt.hashSync( password, salt )
-
-    // user save is to save in MongoDB
-    await user.save()
-
+const patchUser =( req, res = response ) => {
     res.json({
-        user
+        msg: "patch API - Controller"
     })
 }
+
 
 const deleteUser =  async( req, res = response ) => {
+
     const { id } = req.params
 
     // we really erased it
@@ -70,11 +77,6 @@ const deleteUser =  async( req, res = response ) => {
     res.json( user )
 }
 
-const patchUser =( req, res = response ) => {
-    res.json({
-        msg: "patch API - Controller"
-    })
-}
 
 module.exports = { 
     getUser,
