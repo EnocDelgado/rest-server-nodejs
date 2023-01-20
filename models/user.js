@@ -1,6 +1,6 @@
-const { Schema, model } = require('mongoose')
+const { Schema, model } = require('mongoose');
 
-const User = Schema({
+const UserSchema = Schema({
     
     name: {
         type: String,
@@ -30,14 +30,14 @@ const User = Schema({
         type: Boolean,  
         default: false 
     },
-})
+});
 
-User.methods.toJSON = function() {
+UserSchema.methods.toJSON = function() {
 
     const { __v, password, _id, ...user } = this.toObject()
     user.uid = _id
 
     return user
-}
+};
 
-module.exports = model( "Users", User )
+module.exports = model( "User", UserSchema );
