@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const fileUpload = require('express-fileupload')
 const { dbConnnection } = require('../database/config')
+
 class Server {
 
     constructor(){
@@ -26,12 +27,6 @@ class Server {
         // Route middleware
         this.routes()
 
-        // Flieupload 
-        this.app.use( fileUpload({
-            useTempFiles : true,
-            tempFileDir : '/tmp/',
-            createParentPath: true
-        }));
     }
 
     async connectingDB() {
@@ -48,6 +43,13 @@ class Server {
 
         // Public directory
         this.app.use( express.static('public') )
+
+        // Flieupload 
+        this.app.use( fileUpload({
+            useTempFiles : true,
+            tempFileDir : '/tmp/',
+            createParentPath: true
+        }));
     }
 
     routes() {
